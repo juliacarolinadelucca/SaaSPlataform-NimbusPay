@@ -55,6 +55,24 @@ Descrever:
 Pergunta-chave:
 “What happens when a payment request hits the system?”
 
+**Um diagrama High-Level profissional deve conter:**
+
+- Client
+- Load Balancer
+- Kubernetes Cluster
+  - API Service
+- Database (RDS)
+- External Payment Processor
+- Event mechanism
+- Webhook outbound
+- Observability stack
+
+Não precisa mostrar pods.
+Não precisa mostrar node groups.
+Não precisa ser infra low-level.
+
+É diagrama de entendimento, não de Terraform.
+
 ## 3. Core Components
 ### 3.1 API Layer
 ### 3.2 Application Services
