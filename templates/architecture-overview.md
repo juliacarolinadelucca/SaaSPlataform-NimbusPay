@@ -115,10 +115,31 @@ O diagrama:
 - Não entra em detalhe irrelevante (pods, subnets, etc.)
 
 ## 3. Core Components
-### 3.1 API Layer
-### 3.2 Application Services
-### 3.3 Database
-### 3.4 External Integrations
+
+### 3.1 API Service
+- Description
+- Responsibilities
+- Key Characteristics
+
+### 3.2 Database
+- Description
+- Responsibilities
+- Key Characteristics
+
+### 3.3 External Payment Processor
+- Description
+- Responsibilities
+- Key Characteristics
+
+### 3.4 Webhook Delivery
+- Description
+- Responsibilities
+- Key Characteristics
+
+### 3.5 Observability Stack
+- Description
+- Responsibilities
+- Key Characteristics
 
 ## 4. Infrastructure & Hosting
 - Cloud provider
