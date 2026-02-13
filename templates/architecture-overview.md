@@ -194,10 +194,103 @@ Principle:
 Responsibility defines the component — not the tool used.
 
 ## 4. Infrastructure & Hosting
+
+### 4.1 Cloud Provider & Region Model
+### 4.2 Compute & Orchestration
+### 4.3 Networking Model
+### 4.4 Data Infrastructure
+### 4.5 Environment Isolation
+### 4.6 Scaling Model
+
+*insumos*
+
+1️⃣ Infraestrutura como Código (Fonte Primária)
+Onde buscar
+- Repositório de Terraform
+- Repositório de Helm
+- Manifests do Kubernetes
+- Templates CloudFormation (se aplicável)
+
+O que extrair
 - Cloud provider
-- Regions
-- Networking model
-- Containerization / Orchestration
+- Região(ões)
+- Tipo de cluster (EKS, GKE, AKS, etc.)
+- Node groups
+- Configuração do RDS
+- Load balancers
+- Configuração de autoscaling
+- Estratégia de namespaces por ambiente
+- Modelo de VPC / subnets (se relevante)
+
+Perguntas que você responde
+- Existe um cluster por ambiente ou isolamento via namespaces?
+- O banco é compartilhado ou isolado entre ambientes?
+- O sistema é multi-region?
+- Existe autoscaling configurado?
+- Alta disponibilidade (HA) está explicitamente configurada?
+
+Princípio: Infraestrutura como Código é a fonte de verdade mais confiável.
+
+2️⃣ Console Cloud (Fonte de Validação)
+Infraestrutura como Código pode estar desatualizada. Sempre valide.
+Verifique em
+- AWS Console
+- EKS
+- RDS
+- ALB
+- CloudWatch
+
+Confirme
+- Região ativa
+- Quantidade de instâncias
+- Configuração real de autoscaling
+- Configuração Multi-AZ
+- Estado real da infraestrutura em execução
+
+3️⃣ DevOps / Platform Engineer (Fonte Decisória)
+Ferramentas mostram configuração. Engenheiros explicam intenção.
+Pergunte
+- “Como os ambientes são isolados?”
+- “O scaling é automático ou manual?”
+- “O sistema é single-region?”
+- “Qual é o domínio de falha?”
+- “Qual é a estratégia de alta disponibilidade?”
+
+Engenheiros fornecem decisões arquiteturais. Você documenta a intenção arquitetural.
+
+4️⃣ Pipeline de CI/CD (Fonte Operacional)
+
+A configuração de deploy revela o comportamento dos ambientes.
+
+Inspecione
+- GitHub Actions (ou GitLab CI)
+- Targets de deploy
+- Mapeamento de namespaces
+- Variáveis de ambiente
+- Fluxos de promoção entre ambientes
+
+Isso revela
+- Como os ambientes são promovidos
+- Se o isolamento é real ou apenas lógico
+- Se existem aprovações manuais
+- Como a configuração varia entre ambientes
+
+Modelo Mental
+
+A documentação de Infrastructure & Hosting deve descrever claramente:
+- Onde o sistema roda
+- Como ele é provisionado
+- Como os ambientes são isolados
+- Como ele escala
+- Onde ele pode falhar
+
+Esta seção descreve limites de execução e realidades operacionais.
+
+Pergunta Crítica
+
+“Se a AWS us-east-1 ficar indisponível, o que acontece?”
+
+Se ninguém souber responder com clareza, você identificou um gap arquitetural.
 
 ## 5. Environments
 - Development
