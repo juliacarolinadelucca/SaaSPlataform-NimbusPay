@@ -6,7 +6,7 @@
 - Explicar o problema que resolve.
 - Identificar os primary users (personas técnicas ou de negócio).
 - Delimitar o escopo (o que NÃO é responsabilidade da plataforma, se relevante).
-*structure*
+ESTRUTURA
 - 1 parágrafo de definição técnica
 - 1 parágrafo de propósito / problema resolvido
 - 1 parágrafo curto sobre usuários principais
