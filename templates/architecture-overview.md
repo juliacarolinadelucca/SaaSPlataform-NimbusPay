@@ -12,6 +12,17 @@
 - 1 parágrafo de propósito / problema resolvido
 - 1 parágrafo curto sobre usuários principais
 
+*insumos*
+- Product documentation
+- README do repositório
+- Pitch comercial / website
+- Conversa com engenheiros
+- Diagramas existentes
+- Código
+- Tickets de arquitetura
+- RFCs
+- Reuniões técnicas
+
 ## 2. High-Level Architecture
 Diagram and summary of core components.
 
