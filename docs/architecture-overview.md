@@ -30,12 +30,135 @@ State changes emit internal events. If configured, webhook notifications are dis
 ### Observability Layer
 Structured logs are exported to CloudWatch. Application and infrastructure metrics are collected via Prometheus. Alerting policies monitor latency, error rates, and dependency failures.
 
+flowchart LR
+
+    Client[Client Application]
+
+    subgraph AWS
+        ALB[AWS Application Load Balancer]
+
+        subgraph EKS Cluster
+            Ingress[Kubernetes Ingress]
+            API[API Service (Stateless)]
+        end
+
+        RDS[(PostgreSQL - RDS)]
+        CW[CloudWatch Logs]
+        Prom[Prometheus Metrics]
+    end
+
+    Processor[External Payment Processor]
+    Webhook[Client Webhook Endpoint]
+
+    Client -->|HTTPS Request| ALB
+    ALB --> Ingress
+    Ingress --> API
+
+    API -->|Create / Update Transaction| RDS
+    API -->|Payment Execution| Processor
+    Processor -->|Response| API
+
+    API -->|Emit Event| Webhook
+
+    API -->|Structured Logs| CW
+    API -->|Metrics| Prom
+
 
 ## 3. Core Components
-### 3.1 API Layer
-### 3.2 Application Services
-### 3.3 Database
-### 3.4 External Integrations
+
+### 3.1 API Service
+
+#### Description
+The API Service is the single, stateless application entry point for NimbusPay’s runtime behavior. It exposes REST endpoints and orchestrates the full synchronous transaction lifecycle. Statelessness is enforced at the service layer; all durable state is persisted in the database.
+
+#### Responsibilities
+- Accept and process payment-related API requests (e.g., create payment, query status).
+- Authenticate requests by validating JWTs issued via the OAuth2 flow.
+- Validate request payloads and enforce API-level invariants.
+- Create and update transaction records in the persistence layer.
+- Invoke the external payment processor and normalize its response into platform transaction states.
+- Emit internal transaction events after committed state transitions.
+- Initiate webhook delivery when client notifications are configured.
+- Produce structured logs and metrics for monitoring and troubleshooting.
+
+#### Key Characteristics
+- Stateless runtime; horizontal scaling is handled at the orchestration layer.
+- Orchestrates the full transaction lifecycle within a single synchronous execution path.
+- Runs as containerized workloads orchestrated by Kubernetes (EKS) behind ingress routing.
+- Central convergence point for security enforcement and request-level auditing.
+
+
+---
+
+### 3.2 Persistence Layer
+
+#### Description
+The Persistence Layer is the platform’s durable system of record for transaction state and related metadata. It is implemented as a managed PostgreSQL instance hosted on AWS RDS.
+
+#### Responsibilities
+- Persist canonical transaction lifecycle state (created, updated, final outcome).
+- Support read/write patterns for API operations and operational support use cases.
+- Guarantee consistency for state transitions that drive downstream event and webhook behavior.
+
+#### Key Characteristics
+- PostgreSQL (RDS) acts as the authoritative store; the database state is the single source of truth.
+- Designed for durability and consistency rather than in-memory optimization (no cache layer present).
+- All downstream behaviors (events, webhooks, client queries) are derived strictly from committed database state.
+
+
+---
+
+### 3.3 External Payment Processor
+
+#### Description
+The External Payment Processor is a downstream system invoked by NimbusPay to execute payment actions. It represents an architectural boundary outside NimbusPay’s operational control and must be treated as a reliability and latency risk surface.
+
+#### Responsibilities
+- Receive payment execution requests from NimbusPay.
+- Return execution outcomes that can be mapped to internal transaction statuses.
+
+#### Key Characteristics
+- Operates outside NimbusPay’s control; availability and response time directly affect request latency.
+- Integrated synchronously within the API request flow (no separate worker or broker).
+- Requires defensive handling (timeouts, retries, error normalization) to protect platform stability.
+
+
+---
+
+### 3.4 Webhook Delivery Mechanism
+
+#### Description
+The Webhook Delivery Mechanism provides client-facing event notifications derived from committed transaction state. After a transaction state change is persisted, NimbusPay triggers an outbound HTTPS request to the client’s configured webhook endpoint.
+
+#### Responsibilities
+- Translate internal transaction events into standardized webhook payloads.
+- Deliver outbound notifications when client endpoints are configured.
+- Ensure notifications reflect committed state transitions rather than in-flight operations.
+
+#### Key Characteristics
+- Event-driven within the boundaries of the API service (no dedicated broker or worker component).
+- Delivery occurs only after persistence is updated, reducing risk of notifying on uncommitted state.
+- Reliability characteristics are constrained by synchronous execution; no asynchronous queue currently exists.
+
+
+---
+
+### 3.5 Observability Layer
+
+#### Description
+The Observability Layer provides operational visibility required to run and support NimbusPay in production environments. Logging is centralized in CloudWatch, while metrics are collected via Prometheus and used to detect regressions and trigger alerts.
+
+#### Responsibilities
+- Centralize application and platform logs for investigation, auditing, and support.
+- Collect service and infrastructure metrics (latency, error rates, throughput, resource usage).
+- Trigger alerts through CloudWatch Alarms based on defined thresholds and failure conditions.
+
+#### Key Characteristics
+- Operational visibility is externalized; no critical system state depends solely on in-memory runtime inspection.
+- Logs are centralized for cross-environment troubleshooting.
+- Metrics provide time-series visibility into performance and reliability characteristics.
+- Alerts surface operational degradation without requiring manual log inspection.
+
 
 ## 4. Infrastructure & Hosting
 - Cloud provider
