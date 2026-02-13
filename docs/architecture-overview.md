@@ -161,10 +161,92 @@ The Observability Layer provides operational visibility required to run and supp
 
 
 ## 4. Infrastructure & Hosting
-- Cloud provider
-- Regions
-- Networking model
-- Containerization / Orchestration
+
+### 4.1 Cloud Provider & Region Model
+
+NimbusPay is hosted on AWS and currently operates under a single-region deployment model. The architecture does not declare multi-region replication or cross-region failover. As a result, a regional outage would constitute a platform-wide availability event unless additional regional strategies are introduced beyond the current design.
+
+Availability is therefore bounded by the operational health of the single AWS region in use.
+
+---
+
+### 4.2 Compute & Orchestration
+
+Application workloads run as Docker containers orchestrated by Kubernetes on Amazon EKS. The runtime model assumes stateless application instances, with all durable state persisted externally in the database.
+
+A single EKS cluster serves all environments, with logical isolation enforced through Kubernetes namespaces. Provisioning and lifecycle management are driven via the CI/CD pipeline (GitHub Actions), which deploys application workloads into environment-specific namespaces.
+
+This model centralizes execution within a shared cluster substrate while relying on logical isolation for separation of concerns.
+
+---
+
+### 4.3 Networking Model
+
+Inbound traffic enters through an AWS Application Load Balancer (ALB) over HTTPS and is forwarded into the Kubernetes cluster via the ingress controller.
+
+This establishes a perimeter boundary at the load balancer, separating internet-facing ingress traffic from internal east-west communication within the cluster. Once inside the cluster, requests are routed to application services through Kubernetes networking.
+
+Failure domains at this layer include:
+- ALB availability or misconfiguration
+- Ingress routing rules
+- Cluster-level networking policies
+- Internal service discovery failures
+
+---
+
+### 4.4 Data Infrastructure
+
+Persistent transaction data is hosted on AWS RDS using PostgreSQL. The database serves as the platform’s single source of truth and is accessed by workloads running in EKS.
+
+Because the database is the authoritative state store, database availability directly determines platform consistency guarantees. There is no cache layer present, meaning database performance and connectivity directly affect API responsiveness.
+
+Potential failure modes include:
+- RDS instance degradation or outage
+- Connection pool exhaustion
+- Schema migration issues
+- Network connectivity failures between EKS and RDS
+
+---
+
+### 4.5 Environment Isolation
+
+NimbusPay supports dev, staging, and production environments. These environments are logically isolated within the same EKS cluster using Kubernetes namespaces rather than separate clusters.
+
+Namespace isolation separates workloads and associated Kubernetes resources; however, environments share underlying cluster capacity and cluster-level components (e.g., nodes, control plane, ingress).
+
+As a result, cluster-level misconfiguration or resource exhaustion can impact multiple environments simultaneously.
+
+---
+
+### 4.6 Scaling Model
+
+Scaling is achieved primarily through horizontal scaling of container replicas within EKS. Since application services are stateless, replicas can be increased or decreased to meet demand.
+
+However, the absence of asynchronous buffering mechanisms (e.g., message queues or worker tiers) means backpressure propagates directly through the synchronous request path.
+
+Throughput is therefore bounded by:
+- API service replica capacity
+- RDS performance limits
+- External payment processor latency
+- Cluster resource constraints (CPU, memory)
+
+Observability is provided through centralized logs in CloudWatch and metrics collected via Prometheus, enabling capacity analysis and identification of scaling bottlenecks.
+
+---
+
+### 4.7 Failure Domains
+
+Given the current deployment model, NimbusPay’s primary availability risks concentrate around a small set of shared dependencies:
+
+- The single AWS region
+- The shared EKS cluster and ingress path
+- The RDS PostgreSQL instance
+- The external payment processor
+
+Because execution is synchronous and no queue-based buffering is present, prolonged downstream failures or high latency in external dependencies can directly increase API latency and error rates.
+
+Availability is therefore constrained by the narrowest dependency in the synchronous execution chain.
+
 
 ## 5. Environments
 - Development
