@@ -24,7 +24,14 @@
 - Reuniões técnicas
 
 ## 2. High-Level Architecture
-Diagram and summary of core components.
+**Diagram and summary of core components.**
+
+Descrever:
+- Componentes principais
+- Como eles se comunicam
+- Fluxo principal de requisição
+- Dependências externas
+- Camadas do sistema
 
 ## 3. Core Components
 ### 3.1 API Layer
