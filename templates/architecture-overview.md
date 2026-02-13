@@ -141,6 +141,58 @@ O diagrama:
 - Responsibilities
 - Key Characteristics
 
+*insumos*
+
+1️⃣ Code (Primary Source)
+Inspect the repository to identify real service boundaries.
+Questions to answer:
+- What services exist?
+- Is there only one API service?
+- Is there a background worker?
+- Is there a consumer?
+- Is there a scheduler?
+- Is there an event publisher?
+- Is there a separate webhook dispatcher?
+
+Interpretation:
+- If there is only one `api` service → it accumulates multiple responsibilities.
+- If there is `api + worker` → they are distinct architectural components.
+
+Principle:  
+Code reveals structural truth.
+
+2️⃣ Infrastructure (Secondary Source)
+Inspect infrastructure configuration to understand operational separation.
+Look at:
+- Kubernetes manifests
+- Helm charts
+- Terraform modules
+- AWS console configuration
+
+Questions to answer:
+- How many deployments exist?
+- How many services exist?
+- Is autoscaling configured?
+- Is there a queue?
+- Is there a message broker?
+- Are workloads separated by namespace or cluster?
+
+Principle: 
+Infrastructure reveals operational boundaries.
+
+3️⃣ Engineering (Conceptual Source)
+Validate component responsibility through architectural reasoning.
+Ask:
+"If I remove this component, what stops working?"
+This clarifies real system dependency.
+
+Examples:
+- If PostgreSQL is removed → no state persists → critical component.
+- If webhook delivery is removed → core payment still works → secondary component.
+
+Principle:  
+Responsibility defines the component — not the tool used.
+
 ## 4. Infrastructure & Hosting
 - Cloud provider
 - Regions
