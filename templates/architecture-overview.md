@@ -33,6 +33,28 @@ Descrever:
 - Dependências externas
 - Camadas do sistema
 
+*insumos*
+
+1️⃣ Código
+- Estrutura de pastas
+- Serviços existentes
+- Dependências
+
+2️⃣ Infraestrutura
+- Kubernetes manifests
+- Terraform
+- AWS console
+- Load balancer
+
+3️⃣ Pipeline
+- Onde deploya
+- Como sobe container
+- Como escala
+
+4️⃣ Conversa com engenheiro
+Pergunta-chave:
+“What happens when a payment request hits the system?”
+
 ## 3. Core Components
 ### 3.1 API Layer
 ### 3.2 Application Services
