@@ -106,6 +106,13 @@ flowchart LR
     API -->|Structured Logs| CW
     API -->|Metrics| Prom
 
+O diagrama:
+- Mostra fronteiras (AWS vs External)
+- Separa cluster do restante da infra
+- Mostra dependências externas
+- Mostra fluxo principal
+- Mostra observability
+- Não entra em detalhe irrelevante (pods, subnets, etc.)
 
 ## 3. Core Components
 ### 3.1 API Layer
