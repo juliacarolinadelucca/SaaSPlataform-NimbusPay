@@ -73,6 +73,40 @@ Não precisa ser infra low-level.
 
 É diagrama de entendimento, não de Terraform.
 
+flowchart LR
+
+    Client[Client Application]
+
+    subgraph AWS
+        ALB[AWS Application Load Balancer]
+
+        subgraph EKS Cluster
+            Ingress[Kubernetes Ingress]
+            API[API Service (Stateless)]
+        end
+
+        RDS[(PostgreSQL - RDS)]
+        CW[CloudWatch Logs]
+        Prom[Prometheus Metrics]
+    end
+
+    Processor[External Payment Processor]
+    Webhook[Client Webhook Endpoint]
+
+    Client -->|HTTPS Request| ALB
+    ALB --> Ingress
+    Ingress --> API
+
+    API -->|Create / Update Transaction| RDS
+    API -->|Payment Execution| Processor
+    Processor -->|Response| API
+
+    API -->|Emit Event| Webhook
+
+    API -->|Structured Logs| CW
+    API -->|Metrics| Prom
+
+
 ## 3. Core Components
 ### 3.1 API Layer
 ### 3.2 Application Services
