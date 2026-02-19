@@ -1,5 +1,16 @@
 # SaaSPlataform-NimbusPay
 
+NimbusPay responde:
+
+Como o sistema roda?
+
+Como ele escala?
+
+Como ele falha?
+
+Onde estão os riscos infraestruturais?
+
+
 ```text
 cloud-platform-docs/
 │
